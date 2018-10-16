@@ -1,5 +1,4 @@
-# quit as soon as a command fails
-set -e -v
+#!/bin/bash -exo pipefail
 
 echo "Deployment v0.1.0"
 
@@ -14,10 +13,14 @@ elif [ "${CIRCLE_BRANCH}" == "production" ]; then
     echo "Deployment for production not yet implemented..."
     
 else
-    set -e -v
+
+    set -exo pipefail
 
     export TMP_DEV_BRANCH="${CIRCLE_BRANCH}-build-${CIRCLE_BUILD_NUM}"
     export TARGET_BRANCH="development"
+
+    # print current branches
+    git branch -a
 
     # Register repo
     git remote -v
@@ -26,10 +29,14 @@ else
     git remote -v
 
     # Setup and sync target branch
-    git checkout -B ${TARGET_BRANCH}
+    git checkout ${TARGET_BRANCH} || git checkout -B ${TARGET_BRANCH}
     git reset --hard HEAD
-    ((git fetch origin ${TARGET_BRANCH} || echo "No remote branch '${TARGET_BRANCH}' yet"))
-    ((git merge origin/${TARGET_BRANCH} || echo "No remote branch '${TARGET_BRANCH}' to merge"))
+    git fetch origin ${TARGET_BRANCH} || (git push -u origin ${TARGET_BRANCH} && echo "'${TARGET_BRANCH}' branch was created on remote")
+    git merge origin/${TARGET_BRANCH} || echo "No remote changes to merge"
+
+    # merge remote target branch into local
+    git add .
+    git commit -am "Merge '${TARGET_BRANCH}' into local branch" || echo "Nothing to commit"
 
     # Clone branch being updated with a temporary branch
     echo "Setup temporary branch: ${TMP_DEV_BRANCH}"
@@ -49,11 +56,13 @@ else
 
 
     # save new changes to target branch
-    ((git commit -am "Merge new build changes (Build ${CIRCLE_BUILD_NUM})" || echo "Nothing to commit"))
+    git add .
+    git commit -am "Merge new build changes (Build ${CIRCLE_BUILD_NUM})" || echo "Nothing to commit"
 
     git checkout ${TARGET_BRANCH}
-    ((git merge ${TMP_DEV_BRANCH} || echo "Nothing to merge"))
-    ((git push origin ${TARGET_BRANCH} || echo "Nothing to push to ${TARGET_BRANCH}"))
+    git merge ${TMP_DEV_BRANCH}
+
+    git push origin ${TARGET_BRANCH}
 
     # delete tmp branch
     git branch -d ${TMP_DEV_BRANCH}
