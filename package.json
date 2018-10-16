@@ -1,0 +1,21 @@
+{
+  "name": "tpl-next-helpers",
+  "version": "0.0.1",
+  "description": "Helper functions for tpl-next",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Edd Tidbury",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^6.1.0",
+    "fastify-blipp": "^1.2.1",
+    "path": "0.12.7",
+    "pino": "^5.7.0",
+    "pino-pretty": "^2.2.1"
+  },
+  "devDependencies": {
+    "eslint-plugin-promise": "^4.0.1"
+  }
+}
