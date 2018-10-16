@@ -1,8 +1,12 @@
-require('dotenv').config()
+const {
+    PWD
+} = process.env
+
+require('dotenv').config({ path: path.join(PWD, '.env') })
 
 const path = require('path')
 
-const pkgName = require(path.join(process.cwd(),'package')).name
+const pkgName = require(path.join(PWD,'package')).name
 
 if (!pkgName || !pkgName.length){
     throw new TypeError('PM2 Config: Invalid package name. Make sure you specify a name in your package.json file')
@@ -11,7 +15,7 @@ if (!pkgName || !pkgName.length){
 module.exports = {
     'apps': [
         {
-            'cwd': process.cwd(),
+            'cwd': PWD,
             'script': './index.js',
             'name': pkgName,
             // 'watch': [

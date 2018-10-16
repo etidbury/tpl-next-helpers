@@ -1,5 +1,6 @@
 const {
-    NODE_ENV
+    NODE_ENV,
+    PWD
 } = process.env
 
 const path = require('path')
@@ -7,17 +8,15 @@ const path = require('path')
 const isProd = NODE_ENV === 'production'
 
 const requiredModules = [
-    '@babel/core',
-    '@babel/preset-env',
-    '@babel/preset-flow',
     'babel-plugin-module-resolver',
+    'babel-plugin-transform-define',
     '@babel/plugin-proposal-optional-chaining'
 ]
 
 try {
     for(let i = 0; i < requiredModules.length;i++){
         try {
-            require(path.join(process.cwd(),'node_modules',requiredModules[i]))
+            require(path.join(PWD,'node_modules',requiredModules[i]))
         }catch (err){
             console.error(`Error requiring module: ${requiredModules[i]}`)
             throw err
@@ -40,20 +39,43 @@ const plugins = [
         {
             root: ['./'],
             alias: {
-                routes: isProd ? '/.build.routes' : './routes',
-                lib: isProd ? '/.build.lib' : './lib',
-                services: isProd ? '/.build.services' : './services',
-                util: isProd ? '/.build.util' : './util'
+                actions: './actions',
+                components: './components',
+                container: './container',
+                config: './config',
+                constants: './constants',
+                reducers: './reducers',
+                static: './static',
+                stories: './stories',
+                styles: './styles',
+                lib: './lib'
             }
         }
     ]
 ]
 
+try {
+
+    const exposeVars = require(path.join(PWD,'config/expose-vars'))
+
+    plugins.push(['transform-define',exposeVars])
+
+}catch(err){
+    console.warn('Failed to use babel-plugin-transform-define to expose vars to client',err,'Ignoring...')
+}
+
 const presets = [
-    
-    '@babel/preset-env',
-    '@babel/flow'
-    
+    [
+        'next/babel',
+        {
+            targets: {
+                node: 'current'
+            },
+            'preset-env': {
+                modules: 'commonjs'
+            }
+        }
+    ]
 ]
 
 module.exports = {
