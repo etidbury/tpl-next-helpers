@@ -10,7 +10,8 @@ const isProd = NODE_ENV === 'production'
 const requiredModules = [
     'babel-plugin-module-resolver',
     'babel-plugin-transform-define',
-    '@babel/plugin-proposal-optional-chaining'
+    '@babel/plugin-proposal-optional-chaining',
+    'babel-plugin-transform-flow-strip-types'
 ]
 
 try {
@@ -51,7 +52,7 @@ const plugins = [
                 lib: './lib'
             }
         }
-    ]
+    ], 'transform-flow-strip-types'
 ]
 
 try {
